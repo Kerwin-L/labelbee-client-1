@@ -6,12 +6,14 @@
  * @LastEditTime: 2022-05-24 10:43:53
  */
 
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import AnnotationOperation from '@labelbee/lb-components';
 import '@labelbee/lb-components/dist/index.css';
 import { EIpcEvent } from '../constant/event';
 import { AnnotationContext } from '../store';
 import i18n from '@/i18n';
+import axios from 'axios';
+import { getBase64 } from './utils';
 
 const electron = window.require && window.require('electron');
 const ipcRenderer = electron?.ipcRenderer;
@@ -22,6 +24,47 @@ const Annotation = (props: any) => {
     state: { currentProjectInfo, projectList, fileList },
   } = useContext(AnnotationContext);
   const cacheProjectList = useRef(projectList); // TODO: I will rewrite by custom hook later
+  const [devFileList, setDevFileList] = useState(fileList);
+  const [imgIndex, setImgIndex] = useState(currentProjectInfo?.imgIndex ?? 0);
+  const ref = useRef();
+
+  useEffect(() => {
+    if (ref.current) {
+      setTimeout(() => {
+        // @ts-ignore
+        console.log(ref.current, ref.current.getToolInstance);
+        // @ts-ignore
+        ref.current?.toolInstance?.singleOn('createData', (newData: any) => {
+          const url = 'https://31881498uz.goho.co/predict';
+
+          const currentData = devFileList[imgIndex];
+          const img_name = devFileList[imgIndex].fileName;
+
+          let { x, y, width, height } = newData;
+          x = Math.floor(x);
+          y = Math.floor(y);
+          width = Math.floor(width);
+          height = Math.floor(height);
+
+          const bbox = [x, y, x + width, y + height];
+
+          getBase64(currentData.url, (img_base64) => {
+            axios
+              .post(url, {
+                img_name,
+                //@ts-ignore
+                img_base64,
+                bbox,
+                crop: true,
+              })
+              .then((res) => {
+                console.log(res.data);
+              });
+          });
+        });
+      }, 100);
+    }
+  }, [ref.current, imgIndex]);
 
   const onSubmit = (data: any[], submitType: any, i: number) => {
     // 翻页时触发当前页面数据的输出
@@ -67,6 +110,7 @@ const Annotation = (props: any) => {
 
   const onPageChange = (imgIndex: number) => {
     // 保存当前页数到本地
+    setImgIndex(imgIndex);
     updateProjectInfo({ imgIndex });
   };
 
@@ -85,8 +129,11 @@ const Annotation = (props: any) => {
         currentProjectInfo?.resultPath,
       );
       ipcRenderer.once(EIpcEvent.GetFileListResultReply, (event: any, newFileList: any[]) => {
+        const fileList = newFileList.map((file: any) => ({ ...file, url: 'file:///' + file.url }));
+        setDevFileList(fileList);
+
         resolve({
-          fileList: newFileList.map((file: any) => ({ ...file, url: 'file:///' + file.url })),
+          fileList,
           total: fileList.length,
         });
       });
@@ -96,6 +143,7 @@ const Annotation = (props: any) => {
   return (
     <div>
       <AnnotationOperation
+        ref={ref}
         headerName={currentProjectInfo?.name}
         onSubmit={onSubmit}
         onPageChange={onPageChange}
