@@ -3,11 +3,12 @@ import LoadingGif from '@/assets/loading.gif';
 
 interface IProps {
   message?: string;
+  style?: any;
 }
 
-const DataLoading = ({ message = 'Wait a minute ~ Data Loading..' }: IProps) => {
+const DataLoading = ({ message = 'Wait a minute ~ Data Loading..', style = {} }: IProps) => {
   return (
-    <div>
+    <div style={style}>
       <div>
         <img style={{ height: 50 }} src={LoadingGif} alt='loading' />
       </div>

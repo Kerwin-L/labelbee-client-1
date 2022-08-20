@@ -1,6 +1,6 @@
 {
   "name": "labelbee-client",
-  "version": "0.2.0",
+  "version": "0.2.0-alpha-1",
   "private": true,
   "homepage": "./",
   "author": "laoluo <brady_luo.sz@foxmail.com>",
@@ -40,8 +40,8 @@
     "@types/react": "^17.0.4",
     "@types/react-dom": "^17.0.3",
     "@types/react-router-dom": "^5.1.7",
-    "@typescript-eslint/eslint-plugin": "^2.10.0",
-    "@typescript-eslint/parser": "^2.10.0",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
     "axios": "^0.27.2",
     "babel-eslint": "10.1.0",
     "babel-jest": "^24.9.0",

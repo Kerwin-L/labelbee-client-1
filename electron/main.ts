@@ -6,6 +6,10 @@ const version = pkg.version;
 
 // 控制app生命周期.
 const app = electron.app;
+
+// The version of ubuntu >20 needs to use it
+// app.commandLine.appendSwitch('no-sandbox');
+
 // 浏览器窗口.
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
