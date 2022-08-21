@@ -145,7 +145,6 @@ const Annotation = (props: any) => {
     state: { currentProjectInfo, projectList, fileList },
   } = useContext(AnnotationContext);
   const cacheProjectList = useRef(projectList); // TODO: I will rewrite by custom hook later
-  const [devFileList, setDevFileList] = useState(fileList);
   const [imgIndex, setImgIndex] = useState(currentProjectInfo?.imgIndex ?? 0);
   const [predictList, setPredictList] = useState<any[]>([]);
   const [showPredict, setShowPredict] = useState(false);
@@ -163,8 +162,8 @@ const Annotation = (props: any) => {
         toolInstance?.singleOn('createData', (newData: any) => {
           const predictUrl = `${baseUrl}predict`;
 
-          const currentData = devFileList[imgIndex];
-          const img_name = devFileList[imgIndex].fileName;
+          const currentData = fileList[imgIndex];
+          const img_name = fileList[imgIndex].fileName;
 
           let { x, y, width, height } = newData;
           x = Math.floor(x);
@@ -283,11 +282,8 @@ const Annotation = (props: any) => {
         currentProjectInfo?.resultPath,
       );
       ipcRenderer.once(EIpcEvent.GetFileListResultReply, (event: any, newFileList: any[]) => {
-        const fileList = newFileList.map((file: any) => ({ ...file, url: 'file:///' + file.url }));
-        setDevFileList(fileList);
-
         resolve({
-          fileList,
+          fileList: newFileList.map((file: any) => ({ ...file, url: 'file:///' + file.url })),
           total: fileList.length,
         });
       });
